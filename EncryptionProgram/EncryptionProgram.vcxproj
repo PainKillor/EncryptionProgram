@@ -10,6 +10,13 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="StringPrinter.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="StringPrinter.cpp" />
+    <ClCompile Include="TestStub.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{154D608A-E7B2-44A2-9718-0FCADA39200C}</ProjectGuid>
     <RootNamespace>EncryptionProgram</RootNamespace>
