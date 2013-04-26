@@ -200,38 +200,38 @@ Program Interface:
 	           								    90 ch
        <----------------------------------------------------------------------------------------->
       |																				             
-      |										  Alpha Team                                     
-      |									  Encyrption Program                                  
-      |										   CISP 400                                     
+      |						   Alpha Team                                     
+      |						Encryption Program                                  
+      |						   CISP 400                                     
       |                               
-	  |
-	  |								   Key: SD324hAXk34hdfierh
+      |
+      |					    Key: SD324hAXk34hdfierh
       |                                                                                        
-      |			   	     [Data In]								    [Data Out]             
-	  |			 Path: C:\Path\To\Infile.txt			   Path: C:\Path\To\Outfile.txt    
-	  |
-      |		  This is an example of data being			Tbn13.zfgh3....f320,5hdfg3   sd,23
+      |			      [Data In]				       [Data Out]             
+      |		     Path: C:\Path\To\Infile.txt	       Path: C:\Path\To\Outfile.txt    
+      |
+      |		  This is an example of data being	    Tbn13.zfgh3....f320,5hdfg3   sd,23
       |		  displayed that's being read from          an ./...234 85 f,mh  z,f ... 234hd             
-      |		  a text file or was entered manua	   >  	234...262h.2356h . .25 2hj5.235.2.                                           [Commands]
+      |		  a text file or was entered manua     >    234...262h.2356h . .25 2hj5.235.2.                                          [Commands]
       |		  lly for encrpyption. Something s     >    .345 hj hsSDFH 2345.SDFH 345. sdfh                                    key "text string for key"
-      |       omething blah blah blah it forms	   >	..5 345hj.63. 634.6 ...hfd .f.346.			    in (file/text/clear) "location of file or text string for input"                   Encrypting.../Decrypting...    Loading...
-30 ch |	   	  a perfect block of text. Blah bl	   >    ...453 45.5 fdsdhDSHF.....SDHF35..                     out (file/text/clear) "location of filefor output"                 
-	  |       blah blah blah blah blah blah bl          .54235...sdfh32., sf, ; df235 [ fs                                            encrypt
-	  |       blah more text lalalalalalalalal          .... 5rh23.4 2.d SDFSHT ..........                                            decrypt
-      |			       [1 - 8 (20)]							       [1 - 8 (20)] 
+      |           omething blah blah blah it forms     >    ..5 345hj.63. 634.6 ...hfd .f.346.			 in (file/text/clear) "location of file or text string for input"               Encrypting.../Decrypting...        Loading...
+30 ch |	   	  a perfect block of text. Blah bl     >    ...453 45.5 fdsdhDSHF.....SDHF35..                       out (file/text/clear) "location of filefor output"                 
+      |           blah blah blah blah blah blah bl          .54235...sdfh32., sf, ; df235 [ fs                                           encrypt
+      |           blah more text lalalalalalalalal          .... 5rh23.4 2.d SDFSHT ..........                                           decrypt
+      |			   [1 - 8 (20)]				      [1 - 8 (20)] 
       |  		
-	  |
-      |										 [Algorithm]
+      |
+      |						[Algorithm]
       |	               Brian        [Darmeesh]        Ryan       Sung        Sunny
       |
-	  |
-      |       > key asdfh2w345sdfhsdfgh45gh45gsdfg                                                          
+      |
+      |           > key asdfh2w345sdfhsdfgh45gh45gsdfg                                                          
       |	   	  > in file C:\Path\To\Infile.txt                                                                                  [Error] Invalid command     
-	  |	  	  > out file C:\Path\To\Outfile.txt                                                                              Press any key to continue...
-	  |	   	  > encrypt                                                                                     
-	  |		  >                                                                                             
-	  |
-	   <----------------------------------------------------------------------------------------->
+      |	  	  > out file C:\Path\To\Outfile.txt                                                                              Press any key to continue...
+      |	   	  > encrypt                                                                                     
+      |		  >                                                                                             
+      |
+       <----------------------------------------------------------------------------------------->
 	  
 Commands:
 	in [file/text/clear] location/text
