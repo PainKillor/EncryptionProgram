@@ -2,19 +2,30 @@
 
 StringPrinter::StringPrinter() {
 	str = std::string();
-	attributes = std::vector<WORD>();
 	attributeIndices = std::vector<int>();
+	attributes = std::vector<WORD>();
 	hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 }
 
-StringPrinter::StringPrinter(StringPrinter &stringPrinter) {
-	str = stringPrinter.getString();
-	attributes = *stringPrinter.getAttributes();
-	attributeIndices = *stringPrinter.getAttributeIndices();
-	hOutput = stringPrinter.getOutputHandle();
+StringPrinter::StringPrinter(const StringPrinter &stringPrinter) {
+	str = stringPrinter.str;
+	attributeIndices = stringPrinter.attributeIndices;
+	attributes = stringPrinter.attributes;
+	hOutput = stringPrinter.hOutput;
 }
 
-StringPrinter::StringPrinter(std::string str, std::vector<WORD> attributes, std::vector<int> attributeIndices, HANDLE hOutput) {
+StringPrinter::StringPrinter(std::string str, HANDLE hOutput) {
+	attributeIndices = std::vector<int>();
+	attributes = std::vector<WORD>();
+	this->str = str;
+	this->hOutput = hOutput;
+}
+
+StringPrinter::StringPrinter(std::string str, WORD attribute, HANDLE hOutput) {
+	std::vector<int> attributeIndices = std::vector<int>();
+	attributeIndices.push_back(0);
+	std::vector<WORD> attributes = std::vector<WORD>();
+	attributes.push_back(attribute);
 	this->str = str;
 	this->attributes = attributes;
 	this->attributeIndices = attributeIndices;
@@ -22,12 +33,17 @@ StringPrinter::StringPrinter(std::string str, std::vector<WORD> attributes, std:
 }
 
 void StringPrinter::printString() {
+	printString(str.size());
+}
+
+void StringPrinter::printString(int length) {
 	DWORD cWritten;
-	SetConsoleTextAttribute(hOutput, StringPrinter::DEFAULT_ATTRIBUTES);
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	GetConsoleScreenBufferInfo(hOutput, &csbi);
 
 	int index = 0;
 	for (int i = 0; i < attributeIndices.size(); i++) {
-		if (attributeIndices[i] < str.size()) {
+		if (attributeIndices[i] < length) {
 			if (index <= attributeIndices[i]) {
 				int len = attributeIndices[i] - index;
 				WriteConsole(hOutput, str.substr(index, len).c_str(), len, &cWritten, NULL);
@@ -37,8 +53,10 @@ void StringPrinter::printString() {
 		}
 	}
 
-	int len = str.size() - index;
+	int len = length - index;
 	WriteConsole(hOutput, str.substr(index, len).c_str(), len, &cWritten, NULL);
+
+	SetConsoleTextAttribute(hOutput, csbi.wAttributes);
 }
 
 void StringPrinter::setString(std::string str) {
@@ -49,17 +67,17 @@ std::string StringPrinter::getString() {
 	return str;
 }
 
-void StringPrinter::addAttribute(WORD attribute, int attributeIndex) {
-	attributes.push_back(attribute);
+void StringPrinter::addAttribute(int attributeIndex, WORD attribute) {
 	attributeIndices.push_back(attributeIndex);
-}
-
-const std::vector<WORD> * StringPrinter::getAttributes() {
-	return &attributes;
+	attributes.push_back(attribute);
 }
 
 const std::vector<int> * StringPrinter::getAttributeIndices() {
 	return &attributeIndices;
+}
+
+const std::vector<WORD> * StringPrinter::getAttributes() {
+	return &attributes;
 }
 
 void StringPrinter::setOutputHandle(HANDLE hOutput) {
@@ -68,4 +86,8 @@ void StringPrinter::setOutputHandle(HANDLE hOutput) {
 
 HANDLE StringPrinter::getOutputHandle() {
 	return hOutput;
+}
+
+int StringPrinter::size() {
+	return str.size();
 }

@@ -15,8 +15,11 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="LinePrinter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="StringPrinter.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -24,6 +27,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TestStub.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LinePrinter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

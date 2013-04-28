@@ -11,9 +11,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="LinePrinter.h" />
     <ClInclude Include="StringPrinter.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="LinePrinter.cpp" />
     <ClCompile Include="StringPrinter.cpp" />
     <ClCompile Include="TestStub.cpp" />
   </ItemGroup>
