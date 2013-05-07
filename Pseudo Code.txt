@@ -1,0 +1,71 @@
+Class Crypto
+	void loadInputFile(string inFilePath) throws exception
+		Open input file
+		IF unable to open throw exception
+		Read input file into inData
+		IF error reading throw exception
+	end
+	
+	void saveOutputFile(string outFilePath) throws exception
+		IF (outData.size() > 0)
+			Open output file
+			IF unable to open throw exception
+			Save data from outData to output file
+			IF error saving throw exception
+		ENDIF
+	end
+	
+	void clearInput()
+		Empty the inData vector
+	end
+	
+	void clearOutput()
+		Empty the outData vector
+	end
+	
+	void setInputData(vector<char> data)
+		Set inData = data
+	end
+	
+	const vector<char> * getInputData()
+		Return a reference to inData
+	end
+	
+	const vector<char> * getOutputData()
+		Return a reference to outData
+	end
+	
+	void encrypt()
+		Loop through inData 16 bytes at a time and pass it to cipher.encrypt(), store to outData
+	end
+	
+	void decrypt()
+		Loop through inData 16 bytes at a time and pass it to cipher.decrypt(), store to outData
+	end
+	
+	
+Class PagePrinter
+	void printPage()
+		Iterate through linePrinters and invoke printLine() on each of them
+	end
+	
+	void addLinePrinter(LinePrinter linePrinter) 
+		linePrinters.push_back(linePrinter)
+	end
+	
+	void setLinePrinters(vector<LinePrinter> linePrinters)
+		Set this->linePrinters = linePrinters
+	end
+	
+	const vector<LinePrinter> * getLinePrinters()
+		Return a reference to linePrinters
+	end
+	
+Class Cipher
+	void setKey(char key[])
+		Copy the data in key into this->key
+	end
+	
+	const char * getKey()
+		Return key
+	end

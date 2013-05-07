@@ -1,8 +1,8 @@
-#include <Windows.h>
-#include <vector>
-
 #ifndef LINEPRINTER_H
 #define LINEPRINTER_H
+
+#include <Windows.h>
+#include <vector>
 
 #include "StringPrinter.h"
 

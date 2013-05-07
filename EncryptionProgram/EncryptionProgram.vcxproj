@@ -11,13 +11,23 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Cipher.h" />
+    <ClInclude Include="Crypto.h" />
     <ClInclude Include="LinePrinter.h" />
+    <ClInclude Include="PagePrinter.h" />
     <ClInclude Include="StringPrinter.h" />
+    <ClInclude Include="Sung.h" />
+    <ClInclude Include="TUI.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Cipher.cpp" />
+    <ClCompile Include="Crypto.cpp" />
     <ClCompile Include="LinePrinter.cpp" />
+    <ClCompile Include="PagePrinter.cpp" />
     <ClCompile Include="StringPrinter.cpp" />
+    <ClCompile Include="Sung.cpp" />
     <ClCompile Include="TestStub.cpp" />
+    <ClCompile Include="TUI.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{154D608A-E7B2-44A2-9718-0FCADA39200C}</ProjectGuid>
