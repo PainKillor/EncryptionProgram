@@ -8,7 +8,7 @@
 
 class TUI {
 	private:
-		Crypto crypto;
+		Crypto *crypto;
 		HANDLE hOutput;
 		HANDLE hInput;
 		int dataIndex;
@@ -26,15 +26,24 @@ class TUI {
 		bool altPressed;
 
 	public:
+		const static int EXIT = 0;
+		const static int CONTINUE = 1;
+
 		const static int SCREEN_HEIGHT = 40;
 		const static int SCREEN_WIDTH = 120;
 		const static int RIGHT_MARGIN = 10;
 		const static int LEFT_MARGIN = 10;
 		const static int NUM_DATA_LINES = 12;
+		const static int DATA_WIDTH = 48;
 		const static int NUM_COMMAND_HISTORY_LINES = 4;
 
-		TUI();
-		TUI(Crypto crypto = Crypto(), HANDLE hOutput = GetStdHandle(STD_OUTPUT_HANDLE), HANDLE hInput = GetStdHandle(STD_INPUT_HANDLE));
+		const static int BG_WHITE = BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE | BACKGROUND_INTENSITY;
+		const static int FG_BLACK = 0x00;
+		const static int FG_GREY = FOREGROUND_INTENSITY;
+		const static int FG_BROWN = FOREGROUND_GREEN | FOREGROUND_RED;
+
+		TUI(Crypto *crypto = new Crypto(), HANDLE hOutput = GetStdHandle(STD_OUTPUT_HANDLE), HANDLE hInput = GetStdHandle(STD_INPUT_HANDLE));
+		~TUI();
 
 		int processNext();
 		int getLine();

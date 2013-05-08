@@ -13,11 +13,14 @@ Crypto::~Crypto() {
 }
 
 void Crypto::setCipher(Cipher *cipher) {
+	// delete this->cipher
 	// Set this->cipher = cipher
 }
 
 const Cipher * Crypto::getCipher() {
 	// Return reference to cipher
+
+	return 0;
 }
 
 void Crypto::loadInputFile(std::string inFilePath) throw (int) {
@@ -44,10 +47,14 @@ void Crypto::setInputData(std::vector<char> data) {
 
 const std::vector<char> * Crypto::getInputData() {
 	// Return a reference to inData
+
+	return 0;
 }
 
 const std::vector<char> * Crypto::getOutputData() {
 	// Return a reference to outData
+
+	return 0;
 }
 
 void Crypto::encrypt() {

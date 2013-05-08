@@ -22,4 +22,6 @@ void PagePrinter::setLinePrinters(std::vector<LinePrinter> linePrinters) {
 
 const std::vector<LinePrinter> * getLinePrinters() {
 	// Return reference to linePrinters
+
+	return 0;
 }
