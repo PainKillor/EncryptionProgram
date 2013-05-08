@@ -11,22 +11,30 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Brian.h" />
     <ClInclude Include="Cipher.h" />
     <ClInclude Include="Crypto.h" />
+    <ClInclude Include="Dharmesh.h" />
     <ClInclude Include="LinePrinter.h" />
     <ClInclude Include="PagePrinter.h" />
+    <ClInclude Include="Ryan.h" />
     <ClInclude Include="StringPrinter.h" />
     <ClInclude Include="Sung.h" />
+    <ClInclude Include="Sunny.h" />
     <ClInclude Include="TUI.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Brian.cpp" />
     <ClCompile Include="Cipher.cpp" />
     <ClCompile Include="Crypto.cpp" />
+    <ClCompile Include="Dharmesh.cpp" />
     <ClCompile Include="LinePrinter.cpp" />
     <ClCompile Include="PagePrinter.cpp" />
+    <ClCompile Include="Ryan.cpp" />
     <ClCompile Include="StringPrinter.cpp" />
     <ClCompile Include="Sung.cpp" />
     <ClCompile Include="Driver.cpp" />
+    <ClCompile Include="Sunny.cpp" />
     <ClCompile Include="TUI.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

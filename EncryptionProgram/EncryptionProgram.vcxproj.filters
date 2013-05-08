@@ -36,6 +36,18 @@
     <ClInclude Include="PagePrinter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Ryan.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Dharmesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sunny.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Brian.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="StringPrinter.cpp">
@@ -60,6 +72,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Driver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Ryan.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Dharmesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sunny.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Brian.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
