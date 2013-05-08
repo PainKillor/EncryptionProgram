@@ -132,44 +132,58 @@ void TUI::printPage() {
 	HANDLE hScreenBuffer = CreateConsoleScreenBuffer(GENERIC_WRITE | GENERIC_READ, FILE_SHARE_WRITE, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
 	SetConsoleTextAttribute(hScreenBuffer, FG_BLACK | BG_WHITE);
 
-	LinePrinter lp = LinePrinter(SCREEN_WIDTH, NULL, NULL, NULL, FG_BLACK | BG_WHITE, hScreenBuffer);
-	lp.printLine();
+	PagePrinter pagePrinter = PagePrinter();
+
+	LinePrinter lpBlank = LinePrinter(SCREEN_WIDTH, NULL, NULL, NULL, FG_BLACK | BG_WHITE, hScreenBuffer);
+	pagePrinter.addLinePrinter(lpBlank);
 
 	StringPrinter spHeader1 = StringPrinter("Alpha Team", hScreenBuffer);
 	LinePrinter lpHeader1 = LinePrinter(SCREEN_WIDTH, spHeader1, FG_BLACK | BG_WHITE, hScreenBuffer);
-	lpHeader1.printLine();
+	pagePrinter.addLinePrinter(lpHeader1);
 
 	StringPrinter spHeader2 = StringPrinter("Encryption Program", hScreenBuffer);
 	LinePrinter lpHeader2 = LinePrinter(SCREEN_WIDTH, spHeader2, FG_BLACK | BG_WHITE, hScreenBuffer);
-	lpHeader2.printLine();
+	pagePrinter.addLinePrinter(lpHeader2);
 
 	StringPrinter spHeader3 = StringPrinter("CISP 400", hScreenBuffer);
 	LinePrinter lpHeader3 = LinePrinter(SCREEN_WIDTH, spHeader3, FG_BLACK | BG_WHITE, hScreenBuffer);
-	lpHeader3.printLine();
+	pagePrinter.addLinePrinter(lpHeader3);
 
-	lp.printLine();
-	lp.printLine();
+	pagePrinter.addLinePrinter(lpBlank);
+	pagePrinter.addLinePrinter(lpBlank);
 
 	if (!key.empty()) {
 		StringPrinter spKey = StringPrinter("Key: " + key, FG_BLACK | BG_WHITE, hScreenBuffer);
 		spKey.addAttribute(5, FG_GREY | BG_WHITE);
 		LinePrinter lpKey = LinePrinter(SCREEN_WIDTH, spKey, FG_BLACK | BG_WHITE, hScreenBuffer);
-		lpKey.printLine();
+		pagePrinter.addLinePrinter(lpKey);
 	} else {
-		lp.printLine();
+		pagePrinter.addLinePrinter(lpBlank);
 	}
 
-	lp.printLine();
+	pagePrinter.addLinePrinter(lpBlank);
+
+	printData(pagePrinter, hScreenBuffer);
+
+	pagePrinter.printPage();
+
+	SetConsoleActiveScreenBuffer(hScreenBuffer);
+	CloseHandle(hOutput);
+	hOutput = hScreenBuffer;
+}
+
+void TUI::printData(PagePrinter &pagePrinter, HANDLE hScreenBuffer) {
+	LinePrinter lpBlank = LinePrinter(SCREEN_WIDTH, NULL, NULL, NULL, FG_BLACK | BG_WHITE, hScreenBuffer);
 
 	StringPrinter spDataInHeader = StringPrinter("Data In", FG_BLACK | BG_WHITE, hScreenBuffer);
 	LinePrinter lpDataInHeader = LinePrinter(SCREEN_WIDTH / 2, spDataInHeader, FG_BLACK | BG_WHITE, hScreenBuffer);
-	lpDataInHeader.printLine();
+	pagePrinter.addLinePrinter(lpDataInHeader);
 
 	StringPrinter spDataOutHeader = StringPrinter("Data Out", FG_BLACK | BG_WHITE, hScreenBuffer);
 	LinePrinter lpDataOutHeader = LinePrinter(SCREEN_WIDTH - (SCREEN_WIDTH / 2), spDataOutHeader, FG_BLACK | BG_WHITE, hScreenBuffer);
-	lpDataOutHeader.printLine();
+	pagePrinter.addLinePrinter(lpDataOutHeader);
 
-	lp.printLine();
+	pagePrinter.addLinePrinter(lpBlank);
 
 	StringPrinter spPathIn;
 	if (!inFilePath.empty()) {
@@ -183,7 +197,7 @@ void TUI::printPage() {
 	}
 
 	LinePrinter lpPathIn(SCREEN_WIDTH / 2, spPathIn, FG_BLACK | BG_WHITE, hScreenBuffer);
-	lpPathIn.printLine();
+	pagePrinter.addLinePrinter(lpPathIn);
 
 	StringPrinter spPathOut;
 	if (!outFilePath.empty()) {
@@ -197,35 +211,13 @@ void TUI::printPage() {
 	}
 
 	LinePrinter lpPathOut(SCREEN_WIDTH - (SCREEN_WIDTH / 2), spPathOut, FG_BLACK | BG_WHITE, hScreenBuffer);
-	lpPathOut.printLine();
-
-
-
-	SetConsoleActiveScreenBuffer(hScreenBuffer);
-	CloseHandle(hOutput);
-	hOutput = hScreenBuffer;
+	pagePrinter.addLinePrinter(lpPathOut);
 }
 
-void TUI::printHeader(PagePrinter &pagePrinter) {
+void TUI::printAlgorithm(PagePrinter &pagePrinter, HANDLE hScreenBuffer) {
 
 }
 
-void TUI::printKey(PagePrinter &pagePrinter) {
-
-}
-
-void TUI::printDataHeaders(PagePrinter &pagePrinter) {
-
-}
-
-void TUI::printData(PagePrinter &pagePrinter) {
-
-}
-
-void TUI::printAlgorithm(PagePrinter &pagePrinter) {
-
-}
-
-void printCommands(PagePrinter &pagePrinter) {
+void printCommands(PagePrinter &pagePrinter, HANDLE hScreenBuffer) {
 
 }

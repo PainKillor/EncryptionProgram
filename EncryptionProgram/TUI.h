@@ -48,12 +48,12 @@ class TUI {
 		int processNext();
 		int getLine();
 		void printPage();
-		void printHeader(PagePrinter &pagePrinter);
-		void printKey(PagePrinter &pagePrinter);
-		void printDataHeaders(PagePrinter &pagePrinter);
-		void printData(PagePrinter &pagePrinter);
-		void printAlgorithm(PagePrinter &pagePrinter);
-		void printCommands(PagePrinter &pagePrinter);
+		void printHeader(PagePrinter &pagePrinter, HANDLE hScreenBuffer);
+		void printKey(PagePrinter &pagePrinter, HANDLE hScreenBuffer);
+		void printDataHeaders(PagePrinter &pagePrinter, HANDLE hScreenBuffer);
+		void printData(PagePrinter &pagePrinter, HANDLE hScreenBuffer);
+		void printAlgorithm(PagePrinter &pagePrinter, HANDLE hScreenBuffer);
+		void printCommands(PagePrinter &pagePrinter, HANDLE hScreenBuffer);
 };
 
 #endif
