@@ -5,7 +5,13 @@ Crypto::Crypto(const Crypto &crypto) {
 }
 
 Crypto::Crypto(Cipher *cipher, std::vector<char> inData) {
-	// Default/Parametized constructor
+	this->cipher = cipher;
+	this->inData = inData;
+	for (int i = 0; i < 5000; i++) 
+		this->inData.push_back(i % 26 + 97);
+	outData = std::vector<char>();
+	for (int i = 0; i < 8000; i++) 
+		this->outData.push_back(i % 10 + 48);
 }
 
 Crypto::~Crypto() {
@@ -47,14 +53,12 @@ void Crypto::setInputData(std::vector<char> data) {
 
 const std::vector<char> * Crypto::getInputData() {
 	// Return a reference to inData
-
-	return 0;
+	return &inData;
 }
 
 const std::vector<char> * Crypto::getOutputData() {
 	// Return a reference to outData
-
-	return 0;
+	return &outData;
 }
 
 void Crypto::encrypt() {

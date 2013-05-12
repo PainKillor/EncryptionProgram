@@ -19,21 +19,24 @@ class TUI {
 		std::string inFilePath;
 		std::string outFilePath;
 		std::string errorMessage;
-		bool encrypt;
-		bool decrypt;
+		bool encrypting;
+		bool decrypting;
 		bool loading;
 		bool error;
 		bool altPressed;
 
 	public:
 		const static int EXIT = 0;
-		const static int CONTINUE = 1;
+		const static int CONTINUE_REFRESH = 1;
+		const static int CONTINUE_NOREFRESH = 2;
 
-		const static int SCREEN_HEIGHT = 40;
+		const static int ALT_RELEASED = -1;
+
+		const static int SCREEN_HEIGHT = 48;
 		const static int SCREEN_WIDTH = 120;
 		const static int RIGHT_MARGIN = 10;
 		const static int LEFT_MARGIN = 10;
-		const static int NUM_DATA_LINES = 12;
+		const static int NUM_DATA_LINES = 20;
 		const static int DATA_WIDTH = 48;
 		const static int NUM_COMMAND_HISTORY_LINES = 4;
 
