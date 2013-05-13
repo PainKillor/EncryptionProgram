@@ -9,18 +9,13 @@ TUI::TUI(Crypto *crypto, HANDLE hOutput, HANDLE hInput) {
 	this->hInput = hInput;
 	dataIndex = 0;
 	algorithmIndex = 0;
+	curLine = std::string();
 	commandLines = std::vector<std::string>();
 	encrypting = false;
 	decrypting = false;
 	loading = false;
 	error = false;
 	altPressed = false;
-
-	key = "SD324hAXk34hdfierh";
-	commandLines.push_back("> EPIC COMMAND1");
-	commandLines.push_back("> EPIC COMMAND2");
-	commandLines.push_back("> EPIC COMMAND3");
-	commandLines.push_back("> EPIC COMMAND4");
 
 	_COORD coord;
     coord.X = SCREEN_WIDTH;
@@ -44,51 +39,76 @@ TUI::~TUI() {
 }
 
 int TUI::processNext() {
-	curLine = std::string();
+	const static std::string prompt = "> ";
+
 	int keyPressed = getLine();
 
-	//if (keyPressed != 0) {
-	//	if (keyPressed == VK_UP) {
-	//		if (index > NUM_LINES)
-	//			index--;
-	//	} else if (keyPressed = VK_DOWN) {
-	//		if (index < lines.size()) 
-	//			index++;
-	//	}
-	//} else {
-	//	if (strcmp(chBuffer, "exit") != 0) {
-	//		lines.push_back(string(chBuffer));
-	//		chBuffer[0] = '\0';
-	//		index++;
-	//	}
-	//}
-
-	if (keyPressed == VK_MENU) {
-		if (altPressed) {
-			return CONTINUE_NOREFRESH;
-		} else {
-			altPressed = true;
-		}
-	} else if (keyPressed == ALT_RELEASED) {
-		altPressed = false;
+	if (error) {
+		error = false;
 		return CONTINUE_REFRESH;
-	} else if (keyPressed == VK_UP) {
-		if (dataIndex > 0) dataIndex --;
-	} else if (keyPressed == VK_DOWN) {
-		dataIndex++;
-	} else if (keyPressed == VK_LEFT) {
-		if (dataIndex > NUM_DATA_LINES)
-			dataIndex -= NUM_DATA_LINES;
-		else
-			dataIndex = 0;
-	} else if (keyPressed == VK_RIGHT) {
-		dataIndex += NUM_DATA_LINES;
+	}
+
+	switch (keyPressed) {
+		case VK_MENU:
+			if (altPressed)
+				return CONTINUE_NOREFRESH;
+			else
+				altPressed = true;
+			break;
+		case ALT_RELEASED:
+			altPressed = false;
+			return CONTINUE_REFRESH;
+		case VK_UP:
+			if (dataIndex > 0)
+				dataIndex--;
+			break;
+		case VK_DOWN:
+			dataIndex++;
+			break;
+		case VK_PRIOR:
+			if (dataIndex > NUM_DATA_LINES)
+				dataIndex -= NUM_DATA_LINES;
+			else
+				dataIndex = 0;
+			break;
+		case VK_NEXT:
+			dataIndex += NUM_DATA_LINES;
+			break;
+		case VK_LEFT:
+			if (algorithmIndex > 0)
+				algorithmIndex--;
+			break;
+		case VK_RIGHT:
+			if (algorithmIndex < 4)
+				algorithmIndex++;
+			break;
+		case VK_RETURN:
+			int returnValue = processLine(curLine);
+			commandLines.push_back(prompt + curLine);
+			curLine = std::string();
+			return returnValue;
+	}
+
+	return CONTINUE_REFRESH;
+}
+
+int TUI::processLine(std::string line) {
+	if (line.compare("exit") == 0) {
+		return EXIT;
+	} else {
+		error = true;
+		errorMessage = "Invalid command";
+		showCursor(false);
 	}
 	
-	if (curLine.compare("exit") == 0)
-		return EXIT;
-	else
-		return CONTINUE_REFRESH;
+	return CONTINUE_REFRESH;
+}
+
+void TUI::showCursor(bool hide) {
+		CONSOLE_CURSOR_INFO cci;
+		GetConsoleCursorInfo(hOutput, &cci);
+		cci.bVisible = hide;
+		SetConsoleCursorInfo(hOutput, &cci);
 }
 
 int TUI::getLine() {
@@ -97,50 +117,57 @@ int TUI::getLine() {
 
 	const static int length = 256;
 	char chBuffer[length];
+	chBuffer[0] = '\0';
 	int index = curLine.copy(chBuffer, curLine.length(), 0);
 
 	while (true) {
 		ReadConsoleInput(hInput, &prInput, 1, &lpNumRead);
 		if (prInput.EventType == KEY_EVENT) {
 			if (prInput.Event.KeyEvent.bKeyDown == true) {
-				if (isprint(prInput.Event.KeyEvent.uChar.AsciiChar)) {
-					chBuffer[index++ % length] = prInput.Event.KeyEvent.uChar.AsciiChar;
-					WriteConsole(hOutput, &prInput.Event.KeyEvent.uChar.AsciiChar, 1, &lpNumWritten, NULL);
-				} else if (iscntrl(prInput.Event.KeyEvent.uChar.AsciiChar)) {
-					switch (prInput.Event.KeyEvent.wVirtualKeyCode) {
-						case VK_MENU:
-						case VK_UP:
-						case VK_DOWN:
-						case VK_LEFT:
-						case VK_RIGHT:
-							curLine = std::string(chBuffer);
-							return prInput.Event.KeyEvent.wVirtualKeyCode;
-					}
-
-					if (index > 0) {
-						const static char chBackup[] = "\b \b";
-						const static char chNextLine[] = "\r\n";
-
-						switch (prInput.Event.KeyEvent.uChar.AsciiChar) {
-							case '\b':
-								WriteConsole(hOutput, chBackup, 3, &lpNumWritten, NULL);
-								index--;
-								break;
-							case '\r':
-								WriteConsole(hOutput, chNextLine, 2, &lpNumWritten, NULL);
+				if (!error) {
+					if (isprint(prInput.Event.KeyEvent.uChar.AsciiChar)) {
+						chBuffer[index++ % length] = prInput.Event.KeyEvent.uChar.AsciiChar;
+						WriteConsole(hOutput, &prInput.Event.KeyEvent.uChar.AsciiChar, 1, &lpNumWritten, NULL);
+					} else if (iscntrl(prInput.Event.KeyEvent.uChar.AsciiChar)) {
+						switch (prInput.Event.KeyEvent.wVirtualKeyCode) {
+							case VK_MENU:
+							case VK_UP:
+							case VK_DOWN:
+							case VK_PRIOR:
+							case VK_NEXT:
+							case VK_LEFT:
+							case VK_RIGHT:
 								curLine = std::string(chBuffer);
-								return 0;
+								return prInput.Event.KeyEvent.wVirtualKeyCode;
+						}
+
+						if (index > 0) {
+							const static char chBackup[] = "\b \b";
+							const static char chNextLine[] = "\r\n";
+
+							switch (prInput.Event.KeyEvent.uChar.AsciiChar) {
+								case '\b':
+									WriteConsole(hOutput, chBackup, 3, &lpNumWritten, NULL);
+									index--;
+									break;
+								case '\r':
+									WriteConsole(hOutput, chNextLine, 2, &lpNumWritten, NULL);
+									curLine = std::string(chBuffer);
+									return VK_RETURN;
+							}
 						}
 					}
-				}
 
-				if (index % length == 0) {
-					if (index == length)
-						chBuffer[length - 1] = '\0';
-					else
-						chBuffer[0] = '\0';
+					if (index % length == 0) {
+						if (index == length)
+							chBuffer[length - 1] = '\0';
+						else
+							chBuffer[0] = '\0';
+					} else {
+						chBuffer[index % length] = '\0';
+					}
 				} else {
-					chBuffer[index % length] = '\0';
+					return 0;
 				}
 			} else {
 				if (prInput.Event.KeyEvent.wVirtualKeyCode == VK_MENU)
@@ -151,6 +178,10 @@ int TUI::getLine() {
 }
 
 void TUI::printPage() {
+	const static char prompt[] = "> ";
+	const static char blank = ' ';
+	DWORD cWritten;
+
 	HANDLE hScreenBuffer = CreateConsoleScreenBuffer(GENERIC_WRITE | GENERIC_READ, FILE_SHARE_WRITE, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
 	SetConsoleTextAttribute(hScreenBuffer, FG_BLACK | BG_WHITE);
 
@@ -158,12 +189,14 @@ void TUI::printPage() {
 
 	LinePrinter lpBlank = LinePrinter(SCREEN_WIDTH, NULL, NULL, NULL, FG_BLACK | BG_WHITE, hScreenBuffer);
 	pagePrinter.addLinePrinter(lpBlank);
+	pagePrinter.addLinePrinter(lpBlank);
+	pagePrinter.addLinePrinter(lpBlank);
 
 	StringPrinter spHeader1 = StringPrinter("Alpha Team", hScreenBuffer);
 	LinePrinter lpHeader1 = LinePrinter(SCREEN_WIDTH, spHeader1, FG_BLACK | BG_WHITE, hScreenBuffer);
 	pagePrinter.addLinePrinter(lpHeader1);
 
-	StringPrinter spHeader2 = StringPrinter("Encryption Program", hScreenBuffer);
+	StringPrinter spHeader2 = StringPrinter("Final Project", hScreenBuffer);
 	LinePrinter lpHeader2 = LinePrinter(SCREEN_WIDTH, spHeader2, FG_BLACK | BG_WHITE, hScreenBuffer);
 	pagePrinter.addLinePrinter(lpHeader2);
 
@@ -190,13 +223,25 @@ void TUI::printPage() {
 	printAlgorithm(pagePrinter, hScreenBuffer);
 	pagePrinter.addLinePrinter(lpBlank);
 	pagePrinter.addLinePrinter(lpBlank);
+	pagePrinter.addLinePrinter(lpBlank);
 	printCommands(pagePrinter, hScreenBuffer);
 
 	pagePrinter.printPage();
 
+	if (!error) {
+		for (int i = 0; i < LEFT_MARGIN; i++)
+				WriteConsole(hScreenBuffer, &blank, 1, &cWritten, NULL);
+
+		WriteConsole(hScreenBuffer, prompt, 2, &cWritten, NULL);
+		WriteConsole(hScreenBuffer, curLine.c_str(), curLine.length(), &cWritten, NULL);
+	}
+
 	SetConsoleActiveScreenBuffer(hScreenBuffer);
 	CloseHandle(hOutput);
 	hOutput = hScreenBuffer;
+
+	if (error)
+		showCursor(false);
 }
 
 void TUI::printData(PagePrinter &pagePrinter, HANDLE hScreenBuffer) {
@@ -206,7 +251,7 @@ void TUI::printData(PagePrinter &pagePrinter, HANDLE hScreenBuffer) {
 	LinePrinter lpBlank = LinePrinter(SCREEN_WIDTH, NULL, NULL, NULL, FG_BLACK | BG_WHITE, hScreenBuffer);
 	LinePrinter lpHalfBlank = LinePrinter(SCREEN_WIDTH - (SCREEN_WIDTH / 2), NULL, NULL, NULL, FG_BLACK | BG_WHITE, hScreenBuffer);
 
-	StringPrinter spDataInHeader = StringPrinter("Data In", FG_BLACK | BG_WHITE, hScreenBuffer);
+	StringPrinter spDataInHeader = StringPrinter("Data In:", FG_BLACK | BG_WHITE, hScreenBuffer);
 	LinePrinter lpDataInHeader = LinePrinter(SCREEN_WIDTH / 2, spDataInHeader, FG_BLACK | BG_WHITE, hScreenBuffer);
 
 	StringPrinter sp;
@@ -253,7 +298,7 @@ void TUI::printData(PagePrinter &pagePrinter, HANDLE hScreenBuffer) {
 		for (int i = 0; i < (NUM_DATA_LINES - (NUM_COMMANDS + 2)) / 2; i++)
 			pagePrinter.addLinePrinter(lpBlank);
 
-		sp = StringPrinter("Commands", FG_BLACK | BG_WHITE, hScreenBuffer);
+		sp = StringPrinter("Commands:", FG_BLACK | BG_WHITE, hScreenBuffer);
 		lp = LinePrinter(SCREEN_WIDTH, sp, FG_BLACK | BG_WHITE, hScreenBuffer);
 		pagePrinter.addLinePrinter(lp);
 		pagePrinter.addLinePrinter(lpBlank);
@@ -282,17 +327,17 @@ void TUI::printData(PagePrinter &pagePrinter, HANDLE hScreenBuffer) {
 		StringPrinter spPathOut;
 		if (!outFilePath.empty()) {
 			spPathOut = StringPrinter("Mode: File   Path: " + outFilePath, FG_BLACK | BG_WHITE, hScreenBuffer);
-			spPathOut.addAttribute(5, FG_GREY | BG_WHITE);
+			spPathOut.addAttribute(5, FG_BROWN | BG_WHITE);
 			spPathOut.addAttribute(10, FG_BLACK | BG_WHITE);
-			spPathOut.addAttribute(18, FG_GREY | BG_WHITE);
+			spPathOut.addAttribute(18, FG_BROWN | BG_WHITE);
 		} else {
 			spPathOut = StringPrinter("Mode: Text", FG_BLACK | BG_WHITE, hScreenBuffer);
-			spPathOut.addAttribute(5, FG_GREY | BG_WHITE);
+			spPathOut.addAttribute(5, FG_BROWN | BG_WHITE);
 		}
 
 		LinePrinter lpPathOut(SCREEN_WIDTH - (SCREEN_WIDTH / 2), spPathOut, FG_BLACK | BG_WHITE, hScreenBuffer);
 
-		StringPrinter spDataOutHeader = StringPrinter("Data Out", FG_BLACK | BG_WHITE, hScreenBuffer);
+		StringPrinter spDataOutHeader = StringPrinter("Data Out:", FG_BLACK | BG_WHITE, hScreenBuffer);
 		LinePrinter lpDataOutHeader = LinePrinter(SCREEN_WIDTH - (SCREEN_WIDTH / 2), spDataOutHeader, FG_BLACK | BG_WHITE, hScreenBuffer);
 
 		if (crypto->getOutputData()->empty() || encrypting || decrypting) {
@@ -431,83 +476,97 @@ void TUI::printData(PagePrinter &pagePrinter, HANDLE hScreenBuffer) {
 
 void TUI::printAlgorithm(PagePrinter &pagePrinter, HANDLE hScreenBuffer) {
 		const static int MARGIN = 30;
+		const static int WIDTH = (SCREEN_WIDTH - (MARGIN * 2)) / 5;
 
 		LinePrinter lpBlank = LinePrinter(SCREEN_WIDTH, NULL, NULL, NULL, FG_BLACK | BG_WHITE, hScreenBuffer);
 
 		StringPrinter sp;
 		LinePrinter lp;
 
-		sp = StringPrinter("Algorithm", FG_BLACK | BG_WHITE, hScreenBuffer);
+		sp = StringPrinter("Algorithm:", FG_BLACK | BG_WHITE, hScreenBuffer);
 		lp = LinePrinter(SCREEN_WIDTH, sp, FG_BLACK | BG_WHITE, hScreenBuffer);
 		pagePrinter.addLinePrinter(lp);
 		pagePrinter.addLinePrinter(lpBlank);
 
-		lp = LinePrinter(SCREEN_WIDTH, LinePrinter::ALIGN_CENTER, MARGIN, MARGIN, FG_BLACK | BG_WHITE, hScreenBuffer);
-
+		lp = LinePrinter(WIDTH + MARGIN, LinePrinter::ALIGN_CENTER, MARGIN, 0, FG_BLACK | BG_WHITE, hScreenBuffer);
 		if (algorithmIndex == 0) {
 				sp = StringPrinter("[Brian]", FG_BLACK | BG_WHITE, hScreenBuffer);
-				lp.addStringPrinter(sp);
-		} else {
+				sp.addAttribute(1, FG_BROWN | BG_WHITE);
+				sp.addAttribute(6, FG_BLACK | BG_WHITE);
+		} else 
 				sp = StringPrinter("Brian", FG_BLACK | BG_WHITE, hScreenBuffer);
-				lp.addStringPrinter(sp);
-		}
+		lp.addStringPrinter(sp);
+		pagePrinter.addLinePrinter(lp);
 
 		if (algorithmIndex == 1) {
 			sp = StringPrinter("[Dharmesh]", FG_BLACK | BG_WHITE, hScreenBuffer);
-			lp.addStringPrinter(sp);
-		} else {
+			sp.addAttribute(1, FG_BROWN | BG_WHITE);
+			sp.addAttribute(9, FG_BLACK | BG_WHITE);
+		} else
 			sp = StringPrinter("Dharmesh", FG_BLACK | BG_WHITE, hScreenBuffer);
-			lp.addStringPrinter(sp);
-		}
+		lp = LinePrinter(WIDTH, sp, FG_BLACK | BG_WHITE, hScreenBuffer);
+		pagePrinter.addLinePrinter(lp);
 
 		if (algorithmIndex == 2) {
 			sp = StringPrinter("[Sung]", FG_BLACK | BG_WHITE, hScreenBuffer);
-			lp.addStringPrinter(sp);
-		} else {
+			sp.addAttribute(1, FG_BROWN | BG_WHITE);
+			sp.addAttribute(5, FG_BLACK | BG_WHITE);
+		} else 
 			sp = StringPrinter("Sung", FG_BLACK | BG_WHITE, hScreenBuffer);
-			lp.addStringPrinter(sp);
-		}
+		lp = LinePrinter(WIDTH, sp, FG_BLACK | BG_WHITE, hScreenBuffer);
+		pagePrinter.addLinePrinter(lp);
 				
 		if (algorithmIndex == 3) {
 			sp = StringPrinter("[Ryan]", FG_BLACK | BG_WHITE, hScreenBuffer);
-			lp.addStringPrinter(sp);
-		} else {
+			sp.addAttribute(1, FG_BROWN | BG_WHITE);
+			sp.addAttribute(5, FG_BLACK | BG_WHITE);
+		} else
 			sp = StringPrinter("Ryan", FG_BLACK | BG_WHITE, hScreenBuffer);
-			lp.addStringPrinter(sp);
-		}
+		lp = LinePrinter(WIDTH, sp, FG_BLACK | BG_WHITE, hScreenBuffer);
+		pagePrinter.addLinePrinter(lp);
 
+		lp = LinePrinter(SCREEN_WIDTH - (WIDTH * 4 + MARGIN), LinePrinter::ALIGN_CENTER, 0, MARGIN, FG_BLACK | BG_WHITE, hScreenBuffer);
 		if (algorithmIndex == 4) {
 			sp = StringPrinter("[Sunny]", FG_BLACK | BG_WHITE, hScreenBuffer);
-			lp.addStringPrinter(sp);
-		} else {
+			sp.addAttribute(1, FG_BROWN | BG_WHITE);
+			sp.addAttribute(6, FG_BLACK | BG_WHITE);
+		} else
 			sp = StringPrinter("Sunny", FG_BLACK | BG_WHITE, hScreenBuffer);
-			lp.addStringPrinter(sp);
-		}
-
+		lp.addStringPrinter(sp);
 		pagePrinter.addLinePrinter(lp);
 }
 
 void TUI::printCommands(PagePrinter &pagePrinter, HANDLE hScreenBuffer) {
-		const static std::string prompt = "> ";
+	LinePrinter lpBlank = LinePrinter(SCREEN_WIDTH, NULL, NULL, NULL, FG_BLACK | BG_WHITE, hScreenBuffer);
 
-		LinePrinter lpBlank = LinePrinter(SCREEN_WIDTH, NULL, NULL, NULL, FG_BLACK | BG_WHITE, hScreenBuffer);
+	StringPrinter sp;
+	LinePrinter lp;
 
-		StringPrinter sp;
-		LinePrinter lp;
+	if (error) {
+		pagePrinter.addLinePrinter(lpBlank);
+		pagePrinter.addLinePrinter(lpBlank);
 
-		for (int i = 0; i < NUM_COMMAND_HISTORY_LINES; i++) {
-			if (commandLines.size() >= NUM_COMMAND_HISTORY_LINES - i) {
-				lp = LinePrinter(SCREEN_WIDTH, LinePrinter::ALIGN_LEFT, LEFT_MARGIN, RIGHT_MARGIN, FG_BLACK | BG_WHITE, hScreenBuffer);
-				sp = StringPrinter(commandLines[(commandLines.size() - NUM_COMMAND_HISTORY_LINES) + i], FG_BLACK | BG_WHITE, hScreenBuffer);
-				lp.addStringPrinter(sp);
-				pagePrinter.addLinePrinter(lp);
-			} else {
-				pagePrinter.addLinePrinter(lpBlank);
-			}
-		}
-
-		lp = LinePrinter(SCREEN_WIDTH, LinePrinter::ALIGN_LEFT, LEFT_MARGIN, RIGHT_MARGIN, FG_BLACK | BG_WHITE, hScreenBuffer);
-		sp = StringPrinter(prompt, FG_BLACK | BG_WHITE, hScreenBuffer);
-		lp.addStringPrinter(sp);
+		sp = StringPrinter("[Error] " + errorMessage, FG_RED | BG_WHITE, hScreenBuffer);
+		sp.addAttribute(7, FG_BLACK | BG_WHITE);
+		lp = LinePrinter(SCREEN_WIDTH, sp, FG_BLACK | BG_WHITE, hScreenBuffer);
 		pagePrinter.addLinePrinter(lp);
+		sp = StringPrinter("Press any key to continue...", FG_BLACK | BG_WHITE, hScreenBuffer);
+		lp = LinePrinter(SCREEN_WIDTH, sp, FG_BLACK | BG_WHITE, hScreenBuffer);
+		pagePrinter.addLinePrinter(lp);
+	} else {
+		sp = StringPrinter("Terminal:", FG_BLACK | BG_WHITE, hScreenBuffer);
+		lp = LinePrinter(SCREEN_WIDTH, sp, FG_BLACK | BG_WHITE, hScreenBuffer);
+		pagePrinter.addLinePrinter(lp);
+
+		pagePrinter.addLinePrinter(lpBlank);
+
+		int num = commandLines.size() < NUM_COMMAND_HISTORY_LINES ? commandLines.size() : NUM_COMMAND_HISTORY_LINES;
+
+		for (int i = 0; i < num; i++) {
+			lp = LinePrinter(SCREEN_WIDTH, LinePrinter::ALIGN_LEFT, LEFT_MARGIN, RIGHT_MARGIN, FG_BLACK | BG_WHITE, hScreenBuffer);
+			sp = StringPrinter(commandLines[(commandLines.size() - num) + i], FG_BLACK | BG_WHITE, hScreenBuffer);
+			lp.addStringPrinter(sp);
+			pagePrinter.addLinePrinter(lp);
+		}
+	}
 }
