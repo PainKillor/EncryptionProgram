@@ -57,38 +57,30 @@ int TUI::processNext() {
 
 	if (encrypting || decrypting || loading) {
 		if (encrypting || decrypting) {
-			if (!crypto->getInputData()->empty()) {
-				if (!key.empty()) {
-					try {
-						if (encrypting) {
-							crypto->encrypt();
-							encrypting = false;
-						} else if (decrypting) {
-							crypto->decrypt();
-							decrypting = false;
-						}
-						if (!outFilePath.empty())
-							crypto->saveOutputFile(outFilePath);
-					} catch (int e) {
-						switch (e) {
-							case -1:
-								setError("Invalid file size");
-								break;
-							case 0:
-								setError("Unable to save to output file");
-								break;
-						}
-					}
-				} else {
-					setError("No key set");
+			try {
+				if (encrypting) {
+					crypto->encrypt();
 					encrypting = false;
+				} else if (decrypting) {
+					crypto->decrypt();
 					decrypting = false;
 				}
-			} else {
-				setError("No input data loaded");
-				encrypting = false;
-				decrypting = false;
+				if (!outFilePath.empty())
+					crypto->saveOutputFile(outFilePath);
+			} catch (int e) {
+				switch (e) {
+					case -1:
+						setError("Unable to save to output file");
+						break;
+					case 0:
+						setError("Invalid file size");
+						break;
+				}
 			}
+
+			encrypting = false;
+			decrypting = false;
+
 		} else {
 			try {
 				crypto->loadInputFile(inFilePath);
@@ -109,6 +101,9 @@ int TUI::processNext() {
 		return CONTINUE_REFRESH;
 	}
 
+	int numLines = (crypto->getInputData()->size() > crypto->getOutputData()->size()) ? crypto->getInputData()->size() : crypto->getOutputData()->size();
+	numLines = ceil((double) numLines / (double) DATA_WIDTH);
+
 	switch (keyPressed) {
 		case VK_MENU:
 			if (altPressed)
@@ -124,7 +119,8 @@ int TUI::processNext() {
 				dataIndex--;
 			break;
 		case VK_DOWN:
-			dataIndex++;
+			if (dataIndex + NUM_DATA_LINES < numLines)
+				dataIndex++;
 			break;
 		case VK_PRIOR:
 			if (dataIndex > NUM_DATA_LINES)
@@ -133,7 +129,14 @@ int TUI::processNext() {
 				dataIndex = 0;
 			break;
 		case VK_NEXT:
-			dataIndex += NUM_DATA_LINES;
+			if (dataIndex + NUM_DATA_LINES < numLines - NUM_DATA_LINES)
+				dataIndex += NUM_DATA_LINES;
+			else {
+				if (numLines > NUM_DATA_LINES)
+					dataIndex = numLines - NUM_DATA_LINES;
+				else
+					dataIndex = 0;
+			}
 			break;
 		case VK_LEFT:
 			if (algorithmIndex > 0)
@@ -147,7 +150,10 @@ int TUI::processNext() {
 			break;
 		case VK_RETURN:
 			int returnValue = processLine(curLine);
-			commandLines.push_back(prompt + curLine);
+			if (prompt.length() + curLine.length() > SCREEN_WIDTH - LEFT_MARGIN - RIGHT_MARGIN)
+				commandLines.push_back(prompt + curLine.substr(0, SCREEN_WIDTH - LEFT_MARGIN - RIGHT_MARGIN - prompt.length() - 3) + "...");
+			else
+				commandLines.push_back(prompt + curLine);
 			curLine = std::string();
 			return returnValue;
 	}
@@ -174,88 +180,123 @@ void TUI::setCipher() {
 			break;
 	}
 
-	char buff[Cipher::BLOCK_SIZE];
-	for (int i = 0; i < Cipher::BLOCK_SIZE; i++)
-		buff[i] = key.at(i % key.length());
-	crypto->getCipher()->setKey(buff);
+	if (!key.empty()) {
+		char buff[Cipher::BLOCK_SIZE];
+		for (int i = 0; i < Cipher::BLOCK_SIZE; i++)
+			buff[i] = key.at(i % key.length());
+		crypto->getCipher()->setKey(buff);
+	}
 }
 
 int TUI::processLine(std::string line) {
-	line = lowerString(line);
+	std::string lowerLine = lowerString(line);
 
 	int spaceIndex = line.find(' ');
 
 	if (spaceIndex == std::string::npos) {
-		if (line.compare("exit") == 0)
+		if (lowerLine.compare("exit") == 0) {
 			return EXIT;
-		else if (line.compare("encrypt") == 0)
-			encrypting = true;
-		else if (line.compare("decrypt") == 0)
-			decrypting = true;
-		else
+		} else if (lowerLine.compare("encrypt") == 0 || lowerLine.compare("decrypt") == 0) {
+			if (!crypto->getInputData()->empty()) {
+				if (!key.empty()) {
+					if (lowerLine.compare("encrypt") == 0) 
+						encrypting = true;
+					else
+						decrypting = true;
+				} else {
+					setError("No key set");
+				}
+			} else {
+				setError("No input data loaded");
+			}
+		} else if (lowerLine.compare("key") == 0) {
+			setError("Invalid key length");
+		} else {
 			setError("Invalid command");
+		}
 	} else {
-		std::string substr1 = line.substr(0, spaceIndex);
+		std::string substr1 = lowerLine.substr(0, spaceIndex);
 
 		if (substr1.compare("in") == 0 || substr1.compare("out") == 0 || substr1.compare("key") == 0) {
 			std::string substr2 = line.substr(spaceIndex + 1, line.length() - spaceIndex);
+			std::string lowerSubstr2 = lowerLine.substr(spaceIndex + 1, lowerLine.length() - spaceIndex);
 
 			if (substr1.compare("key") == 0) {
-				if (line.length() > spaceIndex) {
-					this->key = substr2;
-					char buff[Cipher::BLOCK_SIZE];
-					for (int i = 0; i < Cipher::BLOCK_SIZE; i++)
-						buff[i] = substr2.at(i % substr2.length());
-					crypto->getCipher()->setKey(buff);
+				if (line.length() > spaceIndex + 1) {
+					if (lowerSubstr2.compare("clear") == 0) {
+						this->key = std::string();
+					} else {
+						if (substr2.length() < Cipher::BLOCK_SIZE) {
+							this->key = substr2;
+							char buff[Cipher::BLOCK_SIZE];
+							for (int i = 0; i < Cipher::BLOCK_SIZE; i++)
+								buff[i] = substr2.at(i % substr2.length());
+							crypto->getCipher()->setKey(buff);
+						} else {
+							setError("Key must be less than 16 characters");
+						}
+					}
 				} else {
 					setError("Invalid key length");
 				}
 			} else {
-				if (substr2.compare("clear") == 0) {
+				if (lowerSubstr2.compare("clear") == 0) {
 					if (substr1.compare("in") == 0) {
 						crypto->clearInput();
+						crypto->clearOutput();
 						inFilePath = std::string();
+						dataIndex = 0;
 					} else {
 						crypto->clearOutput();
 						outFilePath = std::string();
 					}
-				} else if (substr1.compare("out") == 0 && substr2.compare("text") == 0) {
+				} else if (substr1.compare("out") == 0 && lowerSubstr2.compare("text") == 0) {
 					outFilePath = std::string();
 					crypto->clearOutput();
+				} else if (lowerSubstr2.compare("text") == 0 || lowerSubstr2.compare("file") == 0) {
+					if (lowerSubstr2.compare("text") == 0) 
+						setError("Invalid text length");
+					else
+						setError("Invalid path length");
 				} else {
 					int spaceIndex2 = line.find(' ', spaceIndex + 1);
 
 					if (spaceIndex2 != std::string::npos) {
 						substr2 = line.substr(spaceIndex + 1, spaceIndex2 - (spaceIndex + 1));
+						lowerSubstr2 = lowerLine.substr(spaceIndex + 1, spaceIndex2 - (spaceIndex + 1));
 
-						if (substr2.compare("text") == 0 || substr2.compare("file") == 0) {
-							if (substr2.compare("text") == 0) {
+						if (lowerSubstr2.compare("text") == 0 || lowerSubstr2.compare("file") == 0) {
+							if (lowerSubstr2.compare("text") == 0) {
 								if (substr1.compare("in") == 0) {
-									if (line.length() > spaceIndex2) {
+									if (line.length() > spaceIndex2 + 1) {
 										std::string substr3 = line.substr(spaceIndex2 + 1, line.length() - (spaceIndex2 + 1));
 										std::vector<char> inData = std::vector<char>();
 										for (int i = 0; i < substr3.length(); i++)
 											inData.push_back(substr3.at(i));
 										inFilePath = std::string();
 										crypto->setInputData(inData);
+										crypto->clearOutput();
+										dataIndex = 0;
 									} else {
 										setError("Invalid text length");
 									}
 								} 
 							} else {
-								if (line.length() > spaceIndex2) {
+								if (line.length() > spaceIndex2 + 1) {
 									std::string substr3 = line.substr(spaceIndex2 + 1, line.length() - (spaceIndex2 + 1));
 								
 									if (substr1.compare("in") == 0) {
 										inFilePath = substr3;
 										crypto->clearInput();
+										crypto->clearOutput();
 										loading = true;
+										dataIndex = 0;
 									} else {
 										outFilePath = substr3;
 										crypto->clearOutput();
 									}
 								} else {
-									setError("Invalid command");
+									setError("Invalid path length");
 								}
 							}
 						} else {
@@ -303,7 +344,7 @@ int TUI::getLine() {
 	INPUT_RECORD prInput;
 	DWORD lpNumRead, lpNumWritten;
 
-	const static int length = 256;
+	const static int length = 4096;
 	char chBuffer[length];
 	chBuffer[0] = '\0';
 	int index = curLine.copy(chBuffer, curLine.length(), 0);
@@ -313,9 +354,19 @@ int TUI::getLine() {
 		if (prInput.EventType == KEY_EVENT) {
 			if (prInput.Event.KeyEvent.bKeyDown == true) {
 				if (!error) {
+					const static char chNextLine[] = "\r\n";
+
 					if (isprint(prInput.Event.KeyEvent.uChar.AsciiChar)) {
+						const static char blank = ' ';
+
 						chBuffer[index++ % length] = prInput.Event.KeyEvent.uChar.AsciiChar;
 						WriteConsole(hOutput, &prInput.Event.KeyEvent.uChar.AsciiChar, 1, &lpNumWritten, NULL);
+
+						if (index % (SCREEN_WIDTH - LEFT_MARGIN - RIGHT_MARGIN - 2) == 0) {
+							WriteConsole(hOutput, chNextLine, 2, &lpNumWritten, NULL);
+							for (int i = 0; i < LEFT_MARGIN + 2; i++)
+								WriteConsole(hOutput, &blank, 1, &lpNumWritten, NULL);
+						}
 					} else if (iscntrl(prInput.Event.KeyEvent.uChar.AsciiChar)) {
 						switch (prInput.Event.KeyEvent.wVirtualKeyCode) {
 							case VK_MENU:
@@ -331,7 +382,6 @@ int TUI::getLine() {
 
 						if (index > 0) {
 							const static char chBackup[] = "\b \b";
-							const static char chNextLine[] = "\r\n";
 
 							switch (prInput.Event.KeyEvent.uChar.AsciiChar) {
 								case '\b':
@@ -559,14 +609,14 @@ void TUI::printData(PagePrinter &pagePrinter, HANDLE hScreenBuffer) {
 		if (crypto->getOutputData()->empty() || encrypting || decrypting) {
 			// Print input normally, print blanks for data out
 			pagePrinter.addLinePrinter(lpDataInHeader);
-			if (encrypting || decrypting)
+			if (!outFilePath.empty())
 				pagePrinter.addLinePrinter(lpDataOutHeader);
 			else
 				pagePrinter.addLinePrinter(lpHalfBlank);
 			pagePrinter.addLinePrinter(lpBlank);
 
 			pagePrinter.addLinePrinter(lpModeIn);
-			if (encrypting || decrypting) 
+			if (!outFilePath.empty()) 
 				pagePrinter.addLinePrinter(lpModeOut);
 			else
 				pagePrinter.addLinePrinter(lpHalfBlank);
@@ -576,7 +626,7 @@ void TUI::printData(PagePrinter &pagePrinter, HANDLE hScreenBuffer) {
 			else
 				pagePrinter.addLinePrinter(lpHalfBlank);
 
-			if (encrypting || decrypting) {
+			if (!outFilePath.empty()) {
 				if (!outFilePath.empty())
 					pagePrinter.addLinePrinter(lpPathOut);
 				else
@@ -635,7 +685,8 @@ void TUI::printData(PagePrinter &pagePrinter, HANDLE hScreenBuffer) {
 			}
 
 			std::stringstream index;
-			index << dataIndex << " - " << (dataIndex + NUM_DATA_LINES) << " (" << numLines << ")";
+			int pageLen = (dataIndex + NUM_DATA_LINES) < numLines ? (dataIndex + NUM_DATA_LINES) : numLines;
+			index << dataIndex << " - " << pageLen << " (" << numLines << ")";
 
 			sp = StringPrinter(index.str(), FG_BLACK | BG_WHITE, hScreenBuffer);
 			lp = LinePrinter(SCREEN_WIDTH / 2, sp, FG_BLACK | BG_WHITE, hScreenBuffer);
@@ -696,14 +747,16 @@ void TUI::printData(PagePrinter &pagePrinter, HANDLE hScreenBuffer) {
 			}
 
 			std::stringstream index;
-			index << dataIndex << " - " << (dataIndex + NUM_DATA_LINES) << " (" << numLinesIn << ")";
+			int pageLen = (dataIndex + NUM_DATA_LINES) < numLinesIn ? (dataIndex + NUM_DATA_LINES) : numLinesIn;
+			index << dataIndex << " - " << pageLen << " (" << numLinesIn << ")";
 
 			sp = StringPrinter(index.str(), FG_BLACK | BG_WHITE, hScreenBuffer);
 			lp = LinePrinter(SCREEN_WIDTH / 2, sp, FG_BLACK | BG_WHITE, hScreenBuffer);
 			pagePrinter.addLinePrinter(lp);
 			
 			index.str(std::string());
-			index << dataIndex << " - " << (dataIndex + NUM_DATA_LINES) << " (" << numLinesOut << ")";
+			pageLen = (dataIndex + NUM_DATA_LINES) < numLinesOut ? (dataIndex + NUM_DATA_LINES) : numLinesOut;
+			index << dataIndex << " - " << pageLen << " (" << numLinesOut << ")";
 
 			sp = StringPrinter(index.str(), FG_BLACK | BG_WHITE, hScreenBuffer);
 			lp = LinePrinter(SCREEN_WIDTH / 2, sp, FG_BLACK | BG_WHITE, hScreenBuffer);

@@ -1,65 +1,42 @@
 #include "Brian.h"
 
-Brian::Brian()
-{
-	strcpy(key, "");
+Brian::Brian() {
+	for (int i = 0; i < Cipher::BLOCK_SIZE; i++)
+		key[i] = '\0';
 }
 
-Brian::Brian(char key[])
-{
-	strcpy(this->key, key);
+Brian::Brian(char key[]) {
+	for (int i = 0; i < Cipher::BLOCK_SIZE; i++)
+		this->key[i] = key[i];
 }
 
 void Brian::encrypt(char data[]) {
-    //Add modified version of key
-    for (int i = 0; i < BLOCK_SIZE; i++)
-    {
-        data[i] = data[i] + (key[i] * (i + 10));
-    }
-    //Use algorithm to scramble placement
-    char dcopy[BLOCK_SIZE];
-	for (int i = 0; i < BLOCK_SIZE; i++)
-	{
-	    if (i < 8)
-        {
-            dcopy[i] = data[i*2];
-        }
-        else
-        {
-            dcopy[i] = data[2*(i-8)+1];
-        }
+	// Add the value of every index in the key to every index in the data array
+	for (int i = 0; i < BLOCK_SIZE; i++) {
+		data[i] = data[i] + key[i];
 	}
-	//Subtract by another modified key
-	for (int i = 0; i < BLOCK_SIZE; i++)
-	{
-	    data[i] = dcopy[i] - key[i*2];
-	}
-}
 
+	// Shift every member in the array left by 1
+	// So 0123456789012345 -> 1234567890123450
+	char first = data[0];
+	for (int i = 0; i < BLOCK_SIZE - 1; i++) {
+		data[i] = data[i + 1];
+	}
+	data[BLOCK_SIZE - 1] = first;
+}
 
 void Brian::decrypt(char data[])
 {
-    //Add second modified key
-    for (int i = 0; i < BLOCK_SIZE; i++)
-    {
-        data[i] = data[i] + key[i*2];
-    }
-    //Reverse the scramble algorithm
-    char dcopy[BLOCK_SIZE];
-    for (int i = 0; i < BLOCK_SIZE; i++)
-    {
-        if (i % 2)
-        {
-            dcopy[i] = data[(i-1)/2 + 8];
-        }
-        else
-        {
-            dcopy[i] = data[i/2];
-        }
-    }
-    //Subtract the modified key
-    for (int i = 0; i < BLOCK_SIZE; i++)
-    {
-        data[i] = dcopy[i] - (key[i] * (i + 10));
-    }
+	// Shift every member in the array right by 1
+	// So 1234567890123450 -> 0123456789012345
+	char last = data[BLOCK_SIZE - 1];
+	for (int i = BLOCK_SIZE - 1; i >= 0; i--) {
+		data[i] = data[i - 1];
+	}
+	data[0] = last;
+
+	// Subtract the values of they key from the values of the data array
+	for (int i = 0; i < BLOCK_SIZE; i++) {
+		data[i] = data[i] - key[i];
+	}
 }

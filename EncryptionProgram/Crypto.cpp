@@ -32,10 +32,10 @@ void Crypto::loadInputFile(std::string inFilePath) throw (int)  {
 	inputFile.open(inFilePath);
 	if (inputFile)
 	{
+
 		char ch;
-		while(inputFile)
+		while((ch = inputFile.get()) != EOF)
 		{
-			inputFile.get(ch);
 			inData.push_back(ch);
 		}
 		inputFile.close();
@@ -112,6 +112,8 @@ void Crypto::decrypt() throw (int) {
 	if ((inData.size() % Cipher::BLOCK_SIZE) != 0)
 		throw 0;
 
+	outData.resize(inData.size());
+
 	for (int i = 0; i < inData.size(); i += Cipher::BLOCK_SIZE) {
 	char buff[Cipher::BLOCK_SIZE];
 	for (int o = 0; o < Cipher::BLOCK_SIZE; o++)
@@ -125,8 +127,10 @@ void Crypto::decrypt() throw (int) {
 
 	if (outData[outData.size() - 1] == '\0') {
 		for (int i = outData.size() - 2; i > 0; i--) {
-			if (outData[i] != '\0')
-				outData.resize(i);
+			if (outData[i] != '\0') {
+				outData.resize(i + 1);
+				break;
+			}
 		}
 	}
 }

@@ -45,7 +45,7 @@ void StringPrinter::printString(int length) {
 
 	char *buff = new char[str.length() + 1];
 	for (int i = 0; i < str.length(); i++) {
-		if (!iscntrl(str.at(i)))
+		if (!iscntrl((unsigned char) str.at(i)))
 			buff[i] = str.at(i);
 		else
 			buff[i] = subChar;

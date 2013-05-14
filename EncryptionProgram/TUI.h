@@ -41,8 +41,8 @@ class TUI {
 
 		const static int SCREEN_HEIGHT = 53;
 		const static int SCREEN_WIDTH = 120;
-		const static int RIGHT_MARGIN = 10;
-		const static int LEFT_MARGIN = 22;
+		const static int RIGHT_MARGIN = 16;
+		const static int LEFT_MARGIN = 16;
 		const static int NUM_DATA_LINES = 20;
 		const static int DATA_WIDTH = 48;
 		const static int NUM_COMMAND_HISTORY_LINES = 4;
