@@ -122,6 +122,8 @@ void LinePrinter::printLine() {
 					// Otherwise print the string with the width of the entire printable area
 					} else {
 						stringPrinters[0].printString(printWidth);
+						for (int i = 0; i < rightMargin; i++)
+								WriteConsole(hOutput, &blank, 1, &cWritten, NULL);
 					}
 				// If we're printing multiple strings
 				} else {

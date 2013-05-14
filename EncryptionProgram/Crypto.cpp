@@ -1,50 +1,83 @@
 #include "Crypto.h"
 
-Crypto::Crypto(const Crypto &crypto) {
-	// Copy constructor
-}
-
 Crypto::Crypto(Cipher *cipher, std::vector<char> inData) {
-	this->cipher = cipher;
-	this->inData = inData;
-	outData = std::vector<char>();
+	// Default/Parametized constructor
+this->inData = inData;
+this->cipher = cipher;
 }
 
 Crypto::~Crypto() {
 	// Destructor, should delete cipher
+	// Brian, since I couldn't get memory allocated, I cannot delete it either
+	delete cipher;// delete the pointer
 }
 
 void Crypto::setCipher(Cipher *cipher) {
 	// delete this->cipher
 	// Set this->cipher = cipher
+	delete this->cipher;
+	this->cipher = cipher;
 }
 
-const Cipher * Crypto::getCipher() {
+Cipher * Crypto::getCipher() {
 	// Return reference to cipher
-
-	return 0;
+return this->cipher;
+//	return 0;
 }
 
-void Crypto::loadInputFile(std::string inFilePath) throw (int) {
+void Crypto::loadInputFile(std::string inFilePath) throw (int)  {
 	// Load the input file into inData
 	// If there's an error loading throw -1
+	std::ifstream inputFile;
+	inputFile.open(inFilePath);
+	if (inputFile)
+	{
+		char ch;
+		while(inputFile)
+		{
+			inputFile.get(ch);
+			inData.push_back(ch);
+		}
+		inputFile.close();
+	}
+	else
+	{
+		throw (-1);
+	}
 }
 
 void Crypto::saveOutputFile(std::string outFilePath) throw (int) {
 	// Save outData to a file at outFilePath
 	// If there's an error saving throw -1
+	std::ofstream outputFile;
+	outputFile.open(outFilePath);
+	if (outputFile)
+	{
+		for (int i=0; i < outData.size(); i++) 
+		{
+			outputFile.put(outData[i]);
+		}
+		outputFile.close();
+	}
+	else
+	{
+		throw (-1);
+	}
 }
 
 void Crypto::clearInput() {
 	// Clear the inData vector
+	inData.clear();
 }
 
 void Crypto::clearOutput() {
 	// Clear the outData vector
+	outData.clear();
 }
 
 void Crypto::setInputData(std::vector<char> data) {
 	// Set inData to data
+	inData = data;
 }
 
 const std::vector<char> * Crypto::getInputData() {
@@ -58,9 +91,42 @@ const std::vector<char> * Crypto::getOutputData() {
 }
 
 void Crypto::encrypt() {
-	// Leave this function for me, I need to do something special with it
+	for (int i = 0; i < (inData.size() % Cipher::BLOCK_SIZE); i++)
+		inData.push_back('\0');
+
+	outData.resize(inData.size());
+
+	for (int i = 0; i < inData.size(); i += Cipher::BLOCK_SIZE) {
+		char buff[Cipher::BLOCK_SIZE];
+		for (int o = 0; o < Cipher::BLOCK_SIZE; o++)
+			buff[o] = inData[i + o];
+
+		cipher->encrypt(buff);
+
+		for (int o = 0; o < Cipher::BLOCK_SIZE; o++)
+			outData[i + o] = buff[o];
+	}
 }
 
-void Crypto::decrypt() {
-	// Leave this function for me, I need to do something special with it
+void Crypto::decrypt() throw (int) {
+	if ((inData.size() % Cipher::BLOCK_SIZE) != 0)
+		throw 0;
+
+	for (int i = 0; i < inData.size(); i += Cipher::BLOCK_SIZE) {
+	char buff[Cipher::BLOCK_SIZE];
+	for (int o = 0; o < Cipher::BLOCK_SIZE; o++)
+		buff[o] = inData[i + o];
+
+	cipher->decrypt(buff);
+
+	for (int o = 0; o < Cipher::BLOCK_SIZE; o++)
+		outData[i + o] = buff[o];
+	}
+
+	if (outData[outData.size() - 1] == '\0') {
+		for (int i = outData.size() - 2; i > 0; i--) {
+			if (outData[i] != '\0')
+				outData.resize(i);
+		}
+	}
 }

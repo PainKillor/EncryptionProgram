@@ -1,0 +1,241 @@
+Alpha Team Encryption Program
+
+Class Design:
+
+Class Crypto
+	(-) Cipher cipher
+	(-) vector<char> inData
+	(-) vector<char> outData
+	
+	(+) Crypto()
+	(+) Crypto(Crypto crypto)
+	(+) Crypto(Cipher cipher)
+	(+) Crypto(Cipher cipher, vector<char> inData)
+	(+) ~Crypto()
+	
+    (+) void setCipher(Cipher cipher)
+	(+) Cipher getCipher()
+	(+) void loadInputFile(string inFilePath) throws exception
+	(+) saveOutputFile(string outFilePath) throws exception
+	(+) void clearInput()
+	(+) void clearOutput()
+	(+) void setInputData(vector<char> data)
+	(+) const vector<char> * getInputData()
+	(+) const vector<char> * getOutputData()
+	(+) void encrypt()
+	(+) void decrypt()
+	
+Class Cipher
+	(+) const static int BLOCK_SIZE = 16
+
+	(-) char key[]
+	
+	(+) Cipher()
+	(+) Cipher(Cipher cipher)
+	(+) Cipher(char key[])
+	(+) ~Cipher()
+	
+	(+) void setKey(char key[])
+	(+) const char * getKey()
+	
+	(+) virtual void encrypt(char data[])
+	(+) virtual void decrypt(char data[])
+	
+Class Brian extends Cipher
+	(+) Brian()
+	(+) Brian(Cipher cipher)
+	(+) Brian(char key[])
+	(+) ~Brian()
+	
+	(+) void encrypt(char data[])
+	(+) void decrypt(char data[])
+	
+Class Darmeesh extends Cipher
+	(+) Darmeesh()
+	(+) Darmeesh(Cipher cipher)
+	(+) Darmeesh(char key[])
+	(+) ~Darmeesh()
+	
+	(+) void encrypt(char data[])
+	(+) void decrypt(char data[])
+	
+Class Sung extends Cipher
+	(+) Sung()
+	(+) Sung(Cipher cipher)
+	(+) Sung(char key[])
+	(+) ~Sung()
+	
+	(+) void encrypt(char data[])
+	(+) void decrypt(char data[])
+	
+Class Ryan extends Cipher
+	(+) Ryan()
+	(+) Ryan(Cipher cipher)
+	(+) Ryan(char key[])
+	(+) ~Ryan()
+	
+	(+) void encrypt(char data[])
+	(+) void decrypt(char data[])
+	
+Class Sunny extends Cipher
+	(+) Sunny()
+	(+) Sunny(Cipher cipher)
+	(+) Sunny(char key[])
+	(+) ~Sunny()
+	
+	(+) void encrypt(char data[])
+	(+) void decrypt(char data[])
+	
+Class TUI
+	(+) const int SCREEN_HEIGHT = 30
+	(+) const int SCREEN_WIDTH = 90
+	(+) const int RIGHT_MARGIN = 7
+	(+) const int LEFT_MARGIN = 7
+	(+) const int NUM_DATA_LINES = 8
+	(+) const int NUM_COMMAND_HISTORY_LINES = 4
+	(+) const string COMMAND_PROMPT = "> "
+	
+	(-) Crypto crypto
+	(-) HANDLE hOutput
+	(-) HANDLE hInput
+	(-) int dataIndex
+	(-) int algorithmIndex
+	(-) vector<string> commandLines
+	(-) string curLine
+	(-) string key
+	(-) string inFilePath
+	(-) string outFilePath
+	(-) string errorMessage
+	(-) bool encrypt
+	(-) bool decrypt
+	(-) bool loading
+	(-) bool error
+	(-) bool altPressed
+
+	(+) TUI()
+	(+) TUI(TUI tui)
+	(+) TUI(Crypto crypto)
+	(+) TUI(Crypto crypto, HANDLE hOutput, HANDLE hInput)
+	(+) ~TUI()
+	
+	(+) int processNext() // returns 0 to continue or 1 to exit
+	(-) int getLine()
+	(+) void printPage()
+	(-) void printHeader(PagePrinter &pagePrinter)
+	(-) void printKey(PagePrinter &pagePrinter)
+	(-) void printDataHeaders(PagePrinter &pagePrinter)
+	(-) void printData(PagePrinter &pagePrinter)
+	(-) void printAlgorithm(PagePrinter &pagePrinter)
+	(-) void printCommands(PagePrinter &pagePrinter)
+	
+Class PagePrinter
+	(+) const WORD DEFAULT_ATTRIBUTES = foreground_red | foreground_blue | foreground_green
+
+	(-) vector<LinePrinter> linePrinters
+	
+	(+) PagePrinter()
+	(+) PagePrinter(PagePrinter pagePrinter)
+	(+) PagePrinter(vector<LinePrinter> linePrinters)
+	(+) ~PagePrinter()
+	
+	(+) void printPage()
+	(+) void addLinePrinter(LinePrinter linePrinter)
+	(+) void setLinePrinters(vector<LinePrinter> linePrinters)
+	(+) const vector<LinePrinter> * getLinePrinters()
+	
+Class LinePrinter
+	(+) const int ALIGN_LEFT = 0
+	(+) const int ALIGN_CENTER = 1
+	(+) const int ALIGN_RIGHT = 2
+
+	(-) vector<StringPrinter> stringPrinters
+	(-) int lineWidth
+	(-) int leftMargin
+	(-) int rightMargin
+	(-) int alignment
+	(-) HANDLE hOutput
+	
+	(+) LinePrinter()
+	(+) LinePrinter(LinePrinter linePrinter)
+	(+) LinePrinter(int lineWidth, int leftMargin, int rightMargin, int alignment, HANDLE hOutput)
+	(+) ~LinePrinter()
+
+	(+) void printLine()
+	(+) void addStringPrinter(StringPrinter stringPrinter)
+	(+) void setLineWidth(int lineWidth)
+	(+) int getLineWidth()
+	(+) void setLeftMargin(int leftMargin)
+	(+) int getLeftMargin()
+	(+) void setRightMargin(int rightMargin)
+	(+) int getRightMargin()
+	(+) void setAlignment(int alignment)
+	(+) int getAlignment()
+	(+) void setStringPrinters(vector<StringPrinter> stringPrinters)
+	(+) const vector<StringPrinter> * getStringPrinters()
+	(+) void setOutputHandle(HANDLE hOutput)
+	(+) HANDLE getOutputHandle()
+
+Class StringPrinter
+	(-) string str
+	(-) vector<int> attributeIndices
+	(-) vector<WORD> attributes
+	(-) HANDLE hOutput
+	
+	(+) StringPrinter()
+	(+) StringPrinter(StringPrinter stringPrinter)
+	(+) StringPrinter(string str, vector<int> attributeIndices, vector<WORD> attributes, HANDLE hOutput)
+	(+) ~StringPrinter()
+	
+	(+) void printString()
+	(+) void setStr(string str)
+	(+) string getStr()
+	(+) void addAttribute(WORD attribute, int attributeIndex)
+	(+) void setAttributes(vector<WORD> attributes, vector<int> attributeIndices)
+	(+) const vector<WORD> * getAttributes()
+	(+) const vector<int> * getAttributeIndices()
+	(+) void setOutputHandle(HANDLE hOutput)
+	(+) HANDLE getOutputHandle()
+	
+Program Interface:
+	           								    90 ch
+       <----------------------------------------------------------------------------------------->
+      |																				             
+      |						   Alpha Team                                     
+      |						Encryption Program                                  
+      |						   CISP 400                                     
+      |                               
+      |
+      |					    Key: SD324hAXk34hdfierh
+      |                                                                                        
+      |			      [Data In]				       [Data Out]             
+      |		     Path: C:\Path\To\Infile.txt	       Path: C:\Path\To\Outfile.txt    
+      |
+      |		  This is an example of data being	    Tbn13.zfgh3....f320,5hdfg3   sd,23
+      |		  displayed that's being read from          an ./...234 85 f,mh  z,f ... 234hd             
+      |		  a text file or was entered manua     >    234...262h.2356h . .25 2hj5.235.2.                                          [Commands]
+      |		  lly for encrpyption. Something s     >    .345 hj hsSDFH 2345.SDFH 345. sdfh                                    key "text string for key"
+      |           omething blah blah blah it forms     >    ..5 345hj.63. 634.6 ...hfd .f.346.			 in (file/text/clear) "location of file or text string for input"               Encrypting.../Decrypting...        Loading...
+30 ch |	   	  a perfect block of text. Blah bl     >    ...453 45.5 fdsdhDSHF.....SDHF35..                       out (file/text/clear) "location of filefor output"                 
+      |           blah blah blah blah blah blah bl          .54235...sdfh32., sf, ; df235 [ fs                                           encrypt
+      |           blah more text lalalalalalalalal          .... 5rh23.4 2.d SDFSHT ..........                                           decrypt
+      |			   [1 - 8 (20)]				      [1 - 8 (20)] 
+      |  		
+      |
+      |						[Algorithm]
+      |	               Brian        [Darmeesh]        Ryan       Sung        Sunny
+      |
+      |
+      |           > key asdfh2w345sdfhsdfgh45gh45gsdfg                                                          
+      |	   	  > in file C:\Path\To\Infile.txt                                                                                  [Error] Invalid command     
+      |	  	  > out file C:\Path\To\Outfile.txt                                                                              Press any key to continue...
+      |	   	  > encrypt                                                                                     
+      |		  >                                                                                             
+      |
+       <----------------------------------------------------------------------------------------->
+	  
+Commands:
+	in [file/text/clear] location/text
+	out [file/text/clear] location
+	key text
+	encrypt
+	decrypt

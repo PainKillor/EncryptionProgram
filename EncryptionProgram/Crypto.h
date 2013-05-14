@@ -1,11 +1,20 @@
 #ifndef CRYPTO_H
 #define CRYPTO_H
 
-#include <vector>
-
 #include "Cipher.h"
 
-class Crypto {
+#include <iostream>
+#include <string>
+#include <cstring>
+#include <vector>
+#include <fstream>
+
+using namespace std;
+
+#define _BLOCK_SIZE 16
+
+//class Crypto : public Cipher {
+class Crypto   {
 	private:
 		Cipher *cipher;
 		std::vector<char> inData;
@@ -17,7 +26,7 @@ class Crypto {
 		~Crypto();
 
 		void setCipher(Cipher *cipher);
-		const Cipher * getCipher();
+		Cipher * getCipher();
 		void loadInputFile(std::string inFilePath) throw(int);
 		void saveOutputFile(std::string outFilePath) throw(int);
 		void clearInput();
@@ -26,7 +35,7 @@ class Crypto {
 		const std::vector<char> * getInputData();
 		const std::vector<char> * getOutputData();
 		void encrypt();
-		void decrypt();
+		void decrypt() throw (int);
 };
 
 #endif

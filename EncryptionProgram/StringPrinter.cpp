@@ -37,9 +37,22 @@ void StringPrinter::printString() {
 }
 
 void StringPrinter::printString(int length) {
+	const static char subChar = '.';
+
 	DWORD cWritten;
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	GetConsoleScreenBufferInfo(hOutput, &csbi);
+
+	char *buff = new char[str.length() + 1];
+	for (int i = 0; i < str.length(); i++) {
+		if (!iscntrl(str.at(i)))
+			buff[i] = str.at(i);
+		else
+			buff[i] = subChar;
+	}
+	buff[str.length()] = '\0';
+
+	str = std::string(buff);
 
 	int index = 0;
 	for (int i = 0; i < attributeIndices.size(); i++) {

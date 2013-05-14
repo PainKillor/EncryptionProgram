@@ -6,7 +6,7 @@ Cipher::Cipher( )
 }
 Cipher::Cipher(char Key[])
 {
-	strcpy(key,Key);
+	setKey(Key);
 }
 Cipher::Cipher(const Cipher &cipher)
 {
@@ -14,7 +14,8 @@ Cipher::Cipher(const Cipher &cipher)
 }
 void Cipher::setKey(char Key[])
 {
-	strcpy(key,Key);
+	for (int i = 0; i < BLOCK_SIZE; i++)
+		key[i] = Key[i];
 }
 const char* Cipher::getKey()
 {

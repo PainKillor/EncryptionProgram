@@ -26,6 +26,9 @@ class TUI {
 		bool altPressed;
 
 		int getLine();
+		void setCipher();
+		void setError(std::string errorMessage);
+		std::string lowerString(std::string str);
 		int processLine(std::string line);
 		void showCursor(bool hide);
 
@@ -36,7 +39,7 @@ class TUI {
 
 		const static int ALT_RELEASED = -1;
 
-		const static int SCREEN_HEIGHT = 52;
+		const static int SCREEN_HEIGHT = 53;
 		const static int SCREEN_WIDTH = 120;
 		const static int RIGHT_MARGIN = 10;
 		const static int LEFT_MARGIN = 22;
