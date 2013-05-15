@@ -29,15 +29,17 @@ void Crypto::loadInputFile(std::string inFilePath) throw (int)  {
 	// Load the input file into inData
 	// If there's an error loading throw -1
 	std::ifstream inputFile;
-	inputFile.open(inFilePath);
+	inputFile.open(inFilePath, std::ios::in | std::ios::binary);
 	if (inputFile)
 	{
+		inputFile.seekg(0, std::ios::end);   
+		int length = inputFile.tellg();         
+		inputFile.seekg(0, std::ios::beg); 
+		
+		inData.resize(length);
 
-		char ch;
-		while((ch = inputFile.get()) != EOF)
-		{
-			inData.push_back(ch);
-		}
+		inputFile.read(&inData[0], length);
+
 		inputFile.close();
 	}
 	else
@@ -50,7 +52,7 @@ void Crypto::saveOutputFile(std::string outFilePath) throw (int) {
 	// Save outData to a file at outFilePath
 	// If there's an error saving throw -1
 	std::ofstream outputFile;
-	outputFile.open(outFilePath);
+	outputFile.open(outFilePath, std::ios::out | std::ios::binary);
 	if (outputFile)
 	{
 		for (int i=0; i < outData.size(); i++) 

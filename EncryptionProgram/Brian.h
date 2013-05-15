@@ -5,6 +5,9 @@
 
 class Brian : public Cipher
 {
+private:
+	const static int BASENUM = 7;
+
 public :
 	Brian();
 	Brian(char key[]);

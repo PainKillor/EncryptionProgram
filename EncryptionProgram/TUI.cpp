@@ -186,6 +186,7 @@ void TUI::setCipher() {
 			buff[i] = key.at(i % key.length());
 		crypto->getCipher()->setKey(buff);
 	}
+	crypto->clearOutput();
 }
 
 int TUI::processLine(std::string line) {
@@ -232,6 +233,7 @@ int TUI::processLine(std::string line) {
 							for (int i = 0; i < Cipher::BLOCK_SIZE; i++)
 								buff[i] = substr2.at(i % substr2.length());
 							crypto->getCipher()->setKey(buff);
+							crypto->clearOutput();
 						} else {
 							setError("Key must be less than 16 characters");
 						}
